@@ -1,0 +1,101 @@
+syntax = "proto3";
+package api;
+
+option go_package = "github.com/MTursynbekov/ElectronicsStore_gRPC/api";
+
+message Empty{}
+
+message IdRequest{
+    int64 id = 1;
+}
+
+// Category Service
+service CategoryService{
+    rpc GetCategoryList(Empty) returns (CategoriesResponse);
+    rpc GetCategoryById(IdRequest) returns (Category);
+    rpc CreateCategory(CategoryRequest) returns(Empty);
+    rpc UpdateCategory(Category) returns(Empty);
+    rpc DeleteCategory(IdRequest) returns(Empty);
+}
+
+message CategoryRequest {
+    string name = 1;
+}
+
+message Category{
+    int64 id = 1;
+    string name = 2;
+}
+
+message CategoriesResponse{
+    repeated Category categories = 1;
+}
+
+// Brand Service
+service BrandService{
+    rpc GetBrandList(Empty) returns (BrandsResponse);
+    rpc GetBrandById(IdRequest) returns (Brand);
+    rpc CreateBrand(BrandRequest) returns(Empty);
+    rpc UpdateBrand(Brand) returns(Empty);
+    rpc DeleteBrand(IdRequest) returns(Empty);
+}
+
+message BrandRequest {
+    string name = 1;    
+}
+
+message Brand {
+    int64 id = 1;
+    string name = 2;
+}
+
+message BrandsResponse {
+    repeated Brand brands = 1;
+}
+
+
+//Product Service
+service ProductService{
+    rpc GetProductList(Empty) returns (ProductsResponse);
+    rpc GetProductById(IdRequest) returns (Product);
+    rpc CreateProduct(ProductRequest) returns(Empty);
+    rpc UpdateProduct(ProductUpdateRequest) returns(Empty);
+    rpc DeleteProduct(IdRequest) returns(Empty);
+}
+
+message ProductRequest {
+    string name = 1;
+    float price = 2;
+    int64 categoryId = 3;
+    int64 brandId = 4;
+    repeated ProductSpecification specifications = 5;
+    repeated string images = 6;
+    string description = 7;
+}
+
+message ProductUpdateRequest {
+    int64 id = 1;
+    ProductRequest product = 2;
+}
+
+message Product {
+    int64 id = 1;
+    string name = 2;
+    float price = 3;
+    Category category = 4;
+    Brand brand = 5;
+
+    repeated ProductSpecification specifications = 6;
+    repeated string images = 7;
+
+    string description = 8;
+}
+
+message ProductSpecification {
+    string key = 1;
+    string value = 2;
+}
+
+message ProductsResponse {
+    repeated Product products = 1;
+}
