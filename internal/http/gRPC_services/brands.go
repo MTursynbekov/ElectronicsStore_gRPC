@@ -1,22 +1,21 @@
-package main
+package gRPC_services
 
 import (
 	"context"
-
 	"github.com/MTursynbekov/ElectronicsStore_gRPC/api"
 	"github.com/MTursynbekov/ElectronicsStore_gRPC/internal/models"
 	"github.com/MTursynbekov/ElectronicsStore_gRPC/internal/store"
 )
 
 type BrandsService struct {
-	store store.Store
+	Store store.Store
 
 	api.UnimplementedBrandServiceServer
 }
 
 func (s *BrandsService) GetBrandList(ctx context.Context, empty *api.Empty) (*api.BrandsResponse, error) {
 	brandsResponse := new(api.BrandsResponse)
-	brands, err := s.store.Brands().All(ctx)
+	brands, err := s.Store.Brands().All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +31,7 @@ func (s *BrandsService) GetBrandList(ctx context.Context, empty *api.Empty) (*ap
 }
 
 func (s *BrandsService) GetBrandById(ctx context.Context, id *api.IdRequest) (*api.Brand, error) {
-	brand, err := s.store.Brands().ByID(ctx, uint(id.Id))
+	brand, err := s.Store.Brands().ByID(ctx, uint(id.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +49,7 @@ func (s *BrandsService) CreateBrand(ctx context.Context, brandRequest *api.Brand
 		Name: brandRequest.Name,
 	}
 
-	err := s.store.Brands().Create(ctx, brand)
+	err := s.Store.Brands().Create(ctx, brand)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +62,7 @@ func (s *BrandsService) UpdateBrand(ctx context.Context, brandRequest *api.Brand
 		Name: brandRequest.Name,
 	}
 
-	err := s.store.Brands().Update(ctx, brand, uint(brandRequest.Id))
+	err := s.Store.Brands().Update(ctx, brand, uint(brandRequest.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +71,7 @@ func (s *BrandsService) UpdateBrand(ctx context.Context, brandRequest *api.Brand
 }
 
 func (s *BrandsService) DeleteBrand(ctx context.Context, id *api.IdRequest) (*api.Empty, error) {
-	err := s.store.Brands().Delete(ctx, uint(id.Id))
+	err := s.Store.Brands().Delete(ctx, uint(id.Id))
 	if err != nil {
 		return nil, err
 	}

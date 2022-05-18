@@ -24,19 +24,20 @@ func NewProductsRepository(conn *sqlx.DB) store.ProductsRepository {
 	return &ProductsRepository{conn: conn}
 }
 
-func (r ProductsRepository) Create(ctx context.Context, product *models.Product) error {
-	_, err := r.conn.Exec("INSERT INTO products(name, price, category_id, brand_id, description) VALUES ($1, $2, $3, $4, $5)",
+func (r ProductsRepository) Create(ctx context.Context, product *models.Product) (uint, error) {
+	var id uint
+	err := r.conn.QueryRow("INSERT INTO products(name, price, category_id, brand_id, description) VALUES ($1, $2, $3, $4, $5)  RETURNING ID",
 		product.Name,
 		product.Price,
 		product.CategoryId,
 		product.BrandId,
 		product.Description,
-	)
+	).Scan(&id)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (r ProductsRepository) All(ctx context.Context) ([]*models.Product, error) {

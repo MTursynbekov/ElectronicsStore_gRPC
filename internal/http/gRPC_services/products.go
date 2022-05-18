@@ -1,4 +1,4 @@
-package main
+package gRPC_services
 
 import (
 	"context"
@@ -9,14 +9,14 @@ import (
 )
 
 type ProductsService struct {
-	store store.Store
+	Store store.Store
 
 	api.UnimplementedProductServiceServer
 }
 
 func (s *ProductsService) GetProductList(ctx context.Context, empty *api.Empty) (*api.ProductsResponse, error) {
 	productsResponse := new(api.ProductsResponse)
-	products, err := s.store.Products().All(ctx)
+	products, err := s.Store.Products().All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (s *ProductsService) GetProductList(ctx context.Context, empty *api.Empty) 
 			Description: product.Description,
 		}
 
-		err = setProductDependencies(ctx, s.store, productResponse, product)
+		err = setProductDependencies(ctx, s.Store, productResponse, product)
 		if err != nil {
 			return nil, err
 		}
@@ -41,7 +41,7 @@ func (s *ProductsService) GetProductList(ctx context.Context, empty *api.Empty) 
 }
 
 func (s *ProductsService) GetProductById(ctx context.Context, id *api.IdRequest) (*api.Product, error) {
-	product, err := s.store.Products().ByID(ctx, uint(id.Id))
+	product, err := s.Store.Products().ByID(ctx, uint(id.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (s *ProductsService) GetProductById(ctx context.Context, id *api.IdRequest)
 		Description: product.Description,
 	}
 
-	err = setProductDependencies(ctx, s.store, productResponse, product)
+	err = setProductDependencies(ctx, s.Store, productResponse, product)
 	if err != nil {
 		return nil, err
 	}
@@ -70,15 +70,16 @@ func (s *ProductsService) CreateProduct(ctx context.Context, productResponse *ap
 		Description: productResponse.Description,
 	}
 
-	err := s.store.Products().Create(ctx, product)
+	productId, err := s.Store.Products().Create(ctx, product)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, spec := range productResponse.Specifications {
-		err = s.store.ProductSpecifications().Create(ctx, &models.ProductSpecification{
-			Key:   spec.Key,
-			Value: spec.Value,
+		err = s.Store.ProductSpecifications().Create(ctx, &models.ProductSpecification{
+			Key:       spec.Key,
+			Value:     spec.Value,
+			ProductId: productId,
 		})
 		if err != nil {
 			return nil, err
@@ -86,8 +87,9 @@ func (s *ProductsService) CreateProduct(ctx context.Context, productResponse *ap
 	}
 
 	for _, img := range productResponse.Images {
-		err = s.store.ProductImages().Create(ctx, &models.ProductImage{
-			Src: img,
+		err = s.Store.ProductImages().Create(ctx, &models.ProductImage{
+			Src:       img,
+			ProductId: productId,
 		})
 		if err != nil {
 			return nil, err
@@ -106,7 +108,7 @@ func (s *ProductsService) UpdateProduct(ctx context.Context, productResponse *ap
 		Description: productResponse.Product.Description,
 	}
 
-	err := s.store.Products().Update(ctx, product, uint(productResponse.Id))
+	err := s.Store.Products().Update(ctx, product, uint(productResponse.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +117,7 @@ func (s *ProductsService) UpdateProduct(ctx context.Context, productResponse *ap
 }
 
 func (s *ProductsService) DeleteProduct(ctx context.Context, id *api.IdRequest) (*api.Empty, error) {
-	err := s.store.Products().Delete(ctx, uint(id.Id))
+	err := s.Store.Products().Delete(ctx, uint(id.Id))
 	if err != nil {
 		return nil, err
 	}

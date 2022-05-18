@@ -34,7 +34,7 @@ type BrandsRepository interface {
 }
 
 type ProductsRepository interface {
-	Create(ctx context.Context, product *models.Product) error
+	Create(ctx context.Context, product *models.Product) (uint, error)
 	All(ctx context.Context) ([]*models.Product, error)
 	ByID(ctx context.Context, id uint) (*models.Product, error)
 	Update(ctx context.Context, product *models.Product, id uint) error
